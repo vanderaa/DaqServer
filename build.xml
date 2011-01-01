@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="therm" default="main" basedir=".">
+  <!-- Bring in the "onewire" task. -->
+  <taskdef name="tini" classname="net.geeba.ant.Tini"/>  
+<!-- Read any user-specified properties to override the ones below. -->
+  <property file="./build.properties"/>
+  <!-- The TINI ROM API database file. -->
+  
+  <property name="tini.db" value="${tini.dir}/bin/tini.db"/>
+  <!-- The TINI classes. -->
+  <property name="tini.classes" value="${tini.dir}/bin/tiniclasses.jar"/>
+  <!-- Where tini.jar is. -->
+  <property name="tini.jar" value="${tini.dir}/bin/tini.jar"/>
+  <!-- The OneWire containers. -->
+  <property name="tini.containers" value="${tini.dir}/bin/owapi_dependencies_TINI.jar"/>
+  <property name="tini.modules" value="${tini.dir}/bin/modules.jar"/>
+<!-- Where the OneWire dependency groups are defined. -->
+  <property name="tini.containers.dep" value="${tini.dir}/bin/owapi_dep.txt"/>
+  <!-- Prepare the build. -->
+  <target name="prepare">
+    <mkdir dir="build"/>
+  </target>
+
+  <!-- Compile the source code. -->
+  <target name="compile">
+    <javac target="1.1" source="1.3" srcdir="src" destdir="build" bootclasspath="${tini.classes}"
+	   classpath="${tini.containers}:${tini.modules}"/>
+  </target>
+
+  <!-- Build a one-wire TINI program -->
+  <target name="convert">
+    <tini classpath="${tini.jar}"
+	  outputfile="./bin/DaqServer.tini"
+	  database="${tini.db}"
+          dependpath="${tini.containers}:${tini.modules}"
+	  dependencyfile="${tini.containers.dep}"
+          depends="OneWireContainer10:OneWireContainer21:OneWireContainer1D:OneWireContainer06:OneWireContainer05:I2C">
+      <convert dir="build"/>
+    </tini>
+  </target>
+
+  <!-- Main: prepare it, build it, and convert it. -->
+  <target name="main" depends="prepare,compile,convert"/>
+
+  <!-- Clean: remove everything that can be rebuilt. -->
+  <target name="clean">
+    <delete dir="build"/>
+    <delete file="./bin/DaqServer.tini"/>
+  </target>
+
+</project>
